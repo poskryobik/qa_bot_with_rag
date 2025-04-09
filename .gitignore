@@ -1,0 +1,6 @@
+**/__pycache__/
+vectore_store/
+notebooks/
+model/
+data/
+tg_bot/.env

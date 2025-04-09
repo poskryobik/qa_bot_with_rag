@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  faiss_api:
+    build: ./faiss_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./vector_store/faiss_db:/vector_store/faiss_db
+      - ./faiss_api/app:/app
+    environment:
+      - EMBED_MODEL=deepvk/USER-bge-m3
+
+  llm_api:
+    build: ./llm_api
+    ports:
+      - "8001:8000"
+    depends_on:
+      - faiss_api
+      # - rabbitmq
+    volumes:
+      - ./llm_api/app:/app
+      - ./model:/model
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - FAISS_API_URL=http://faiss_api:8000
+      - LLM_NAME=model/gemma-3-1b-it
+      # - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+  tg_bot:
+    build:
+      context: ./tg_bot
+    container_name: tg_bot
+    volumes:
+      - ./tg_bot:/tg_bot
+    environment:
+      - FAISS_API_URL=http://faiss_api:8000
+      - LLM_API_URL=http://llm_api:8000
+    # networks:
+      # - bot-network
+    # command: python tg_bot/main.py
+
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: guest
+  #     RABBITMQ_DEFAULT_PASS: guest
+
+# volumes:
+#   vector_store:
