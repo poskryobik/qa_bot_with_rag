@@ -64,4 +64,4 @@ docker compose up
 
 ## Демонстрация работы
 
-![](https://github.com/poskryobik/qa_bot_with_rag/blob/main/imgs/bot.gif)
+![](https://github.com/poskryobik/qa_bot_with_rag/blob/main/imgs/gif.gif)
